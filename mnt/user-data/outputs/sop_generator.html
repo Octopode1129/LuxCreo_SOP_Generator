@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuxCreo SOP Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Recursive:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --orange: #f97316;
+            --orange-dark: #ea580c;
+            --purple-1: #667eea;
+            --purple-2: #764ba2;
+            --light: #f8fafc;
+            --gray: #e2e8f0;
+            --dark: #1e293b;
+            --text: #334155;
+        }
+
+        body {
+            font-family: 'Recursive', sans-serif;
+            background: linear-gradient(135deg, var(--purple-1) 0%, var(--purple-2) 100%);
+            color: var(--dark);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .top-nav {
+            background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+            padding: 20px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            margin: -20px -20px 20px -20px;
+            color: white;
+            font-size: 1.5em;
+            font-weight: 900;
+            letter-spacing: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-buttons { display: flex; gap: 10px; }
+
+        .btn-nav {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-family: 'Recursive', sans-serif;
+        }
+
+        .btn-nav:hover {
+            background: white;
+            color: var(--orange);
+            border-color: white;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .page { display: none; padding: 30px; }
+        .page.active { display: block; overflow-y: auto; max-height: calc(100vh - 200px); }
+
+        .gen-header {
+            background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin: -30px -30px 30px -30px;
+        }
+
+        .gen-header h1 {
+            font-size: 2em;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .form-section {
+            background: var(--light);
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-section-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--orange);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--orange);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input, .form-select {
+            padding: 12px;
+            border: 2px solid var(--gray);
+            border-radius: 6px;
+            font-family: 'Recursive', sans-serif;
+            font-size: 0.95em;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--orange);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .step-builder {
+            background: var(--light);
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .step-builder-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--orange);
+        }
+
+        .add-step-btn {
+            background: var(--orange);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            font-family: 'Recursive', sans-serif;
+        }
+
+        .add-step-btn:hover {
+            background: var(--orange-dark);
+            transform: translateY(-2px);
+        }
+
+        .step-item {
+            background: white;
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .step-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .step-header input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--gray);
+            border-radius: 6px;
+            font-weight: 600;
+            font-family: 'Recursive', sans-serif;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-danger:hover {
+            background: #991b1b;
+        }
+
+        .substep-item {
+            background: var(--light);
+            border-left: 4px solid var(--orange);
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+        }
+
+        .substep-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .substep-label {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.9em;
+        }
+
+        .substep-input {
+            padding: 10px;
+            border: 2px solid var(--gray);
+            border-radius: 6px;
+            font-family: 'Recursive', sans-serif;
+            font-size: 0.95em;
+        }
+
+        .tag-input {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid var(--gray);
+        }
+
+        .tag {
+            background: var(--orange);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tag button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tag-add-input {
+            flex: 1;
+            min-width: 150px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .image-upload-area {
+            border: 2px dashed var(--orange);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background: rgba(249, 115, 22, 0.05);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .image-upload-area:hover {
+            background: rgba(249, 115, 22, 0.1);
+            border-color: var(--orange-dark);
+        }
+
+        .image-upload-area input[type="file"] {
+            display: none;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid var(--gray);
+        }
+
+        .add-substep-btn {
+            background: white;
+            border: 2px solid var(--orange);
+            color: var(--orange);
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .add-substep-btn:hover {
+            background: var(--orange);
+            color: white;
+        }
+
+        .save-sop-btn {
+            background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .save-sop-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .crop-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+            max-height: 500px;
+            overflow: auto;
+        }
+
+        .crop-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .crop-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Recursive', sans-serif;
+        }
+
+        .crop-btn-primary {
+            background: var(--orange);
+            color: white;
+        }
+
+        .crop-btn-secondary {
+            background: var(--gray);
+            color: var(--dark);
+        }
+
+        .sop-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .sop-card {
+            background: var(--light);
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .sop-card:hover {
+            border-color: var(--orange);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(249, 115, 22, 0.2);
+        }
+
+        .sop-card-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .sop-card-meta {
+            font-size: 0.9em;
+            color: var(--text);
+            margin-bottom: 15px;
+        }
+
+        .sop-card-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-view {
+            background: var(--orange);
+            color: white;
+        }
+
+        .btn-delete {
+            background: #dc2626;
+            color: white;
+        }
+
+        .sop-viewer {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .sop-header {
+            background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .sop-title {
+            font-size: 2.2em;
+            font-weight: 900;
+            margin-bottom: 15px;
+        }
+
+        .sop-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .sop-meta-item {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 15px;
+            border-radius: 6px;
+        }
+
+        .sop-meta-label {
+            font-size: 0.85em;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+
+        .sop-meta-value {
+            font-size: 1em;
+            font-weight: 700;
+        }
+
+        .sop-section {
+            background: var(--light);
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .sop-section-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--orange);
+        }
+
+        .sop-step {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-left: 4px solid var(--orange);
+            border-radius: 4px;
+        }
+
+        .sop-step-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .sop-substep {
+            margin-left: 20px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: var(--light);
+            border-radius: 6px;
+        }
+
+        .sop-substep-description {
+            color: var(--text);
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .sop-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .sop-tag {
+            background: var(--orange);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .sop-image {
+            max-width: 100%;
+            max-height: 400px;
+            margin: 12px 0;
+            border-radius: 6px;
+            border: 1px solid var(--gray);
+        }
+
+        .back-btn {
+            background: var(--orange);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text);
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .top-nav { flex-direction: column; gap: 15px; }
+            .nav-buttons { width: 100%; }
+            .sop-list { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-nav">
+        <span>LUXCREO SOP GENERATOR</span>
+        <div class="nav-buttons">
+            <button class="btn-nav" onclick="showPage('generator')">Create SOP</button>
+            <button class="btn-nav" onclick="showPage('viewer')">View SOPs</button>
+            <div id="storage-indicator" style="padding: 8px 15px; background: rgba(255,255,255,0.2); border-radius: 6px; border: 2px solid rgba(255,255,255,0.4); color: white; font-size: 0.85em; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: help; transition: all 0.3s;" title="☁️ Claude Storage = Data syncs within Claude (shareable in project). 💻 Browser Storage = Data saved locally in this browser only (not shared)">
+                <span id="storage-icon">💾</span>
+                <span id="storage-text">Checking storage...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Generator Page -->
+        <div id="generator" class="page active">
+            <div class="gen-header">
+                <h1>SOP Generator</h1>
+                <p>Create production guides with steps, images, and tags</p>
+            </div>
+
+            <!-- Basic Info -->
+            <div class="form-section">
+                <div class="form-section-title">Material & Equipment Selection</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Material</label>
+                        <select id="material" class="form-select">
+                            <option>DMR III</option>
+                            <option>DCA</option>
+                            <option>DCA Plus White</option>
+                            <option>FPD</option>
+                            <option>DNG</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Application</label>
+                        <input type="text" id="application" class="form-input" placeholder="e.g., Aligner/Retainer">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Printer/Equipment</label>
+                        <select id="equipment" class="form-select">
+                            <option>iLuxPro Dental</option>
+                            <option>FastPrint.io</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Resin Tank</label>
+                        <select id="resinTank" class="form-select">
+                            <option>LEAP C+ (Digital Polishing)</option>
+                            <option>LEAP X</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Firmware Versions -->
+            <div class="form-section">
+                <div class="form-section-title">Software & Firmware Versions</div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="luxdesignEnabled">
+                    <label for="luxdesignEnabled">LuxDesign (Optional)</label>
+                </div>
+                <div id="luxdesignVersion" style="display: none; margin-bottom: 20px;">
+                    <input type="text" id="luxdesignVersionValue" class="form-input" placeholder="e.g., V2.3.2+">
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">LuxFlow Version</label>
+                        <input type="text" id="luxflowVersion" class="form-input" placeholder="e.g., V1.4.3 or above">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Printer Firmware</label>
+                        <input type="text" id="printerFirmware" class="form-input" placeholder="e.g., V5.5.8.t14 or above">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Wash Box Firmware</label>
+                        <input type="text" id="washBoxFirmware" class="form-input" placeholder="e.g., V2.1.0.250509L/F">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Cure Box Firmware</label>
+                        <input type="text" id="cureBoxFirmware" class="form-input" placeholder="e.g., V1.0.1.250415 or above">
+                    </div>
+                </div>
+            </div>
+
+            <!-- LuxFlow Steps -->
+            <div class="step-builder">
+                <div class="step-builder-title">Section 1: LuxFlow - One Click Generation</div>
+                <button class="add-step-btn" onclick="addStep('luxflow')">+ Add Step</button>
+                <div id="luxflow-steps"></div>
+            </div>
+
+            <!-- Post-Processing Steps -->
+            <div class="step-builder">
+                <div class="step-builder-title">Section 2: Post-Processing</div>
+                <button class="add-step-btn" onclick="addStep('postprocess')">+ Add Step</button>
+                <div id="postprocess-steps"></div>
+            </div>
+
+            <!-- Finishing Section -->
+            <div class="form-section">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="finishingEnabled">
+                    <label for="finishingEnabled">Include Finishing Section</label>
+                </div>
+            </div>
+
+            <div id="finishing-section" style="display: none;">
+                <div class="step-builder">
+                    <div class="step-builder-title">Section 3: Finishing</div>
+                    <button class="add-step-btn" onclick="addStep('finishing')">+ Add Step</button>
+                    <div id="finishing-steps"></div>
+                </div>
+            </div>
+
+            <button class="save-sop-btn" onclick="saveSOP()">Save SOP</button>
+        </div>
+
+        <!-- Viewer Page -->
+        <div id="viewer" class="page">
+            <div style="margin-bottom: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn-nav" onclick="exportSOPs()" style="padding: 12px 24px; font-size: 1em;">📥 Export SOPs</button>
+                <button class="btn-nav" onclick="triggerImport()" style="padding: 12px 24px; font-size: 1em;">📤 Import SOPs</button>
+                <input type="file" id="import-file" accept=".json" onchange="importSOPs(event)" style="display: none;">
+            </div>
+            <div id="sop-list-view"></div>
+            <div id="sop-detail-view" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Image Cropper Modal -->
+    <div id="cropperModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Crop Image</div>
+            <div class="crop-container">
+                <img id="cropImage">
+            </div>
+            <div class="crop-controls">
+                <button class="crop-btn crop-btn-primary" onclick="confirmCrop()">Use This Image</button>
+                <button class="crop-btn crop-btn-secondary" onclick="closeCropper()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script>
+        const sopData = {
+            luxflow: [],
+            postprocess: [],
+            finishing: []
+        };
+
+        let allSOPs = {};
+        let currentSOPView = null;
+        let currentCropper = null;
+        let cropperContext = {};
+        let storageType = 'localStorage'; // Will be updated on init
+
+        async function init() {
+            await loadSOPs();
+            updateStorageIndicator();
+            renderSOPList();
+            setupEventListeners();
+        }
+
+        function updateStorageIndicator() {
+            const indicator = document.getElementById('storage-text');
+            const icon = document.getElementById('storage-icon');
+            
+            if (storageType === 'window.storage') {
+                indicator.textContent = '☁️ Claude Storage (Shared)';
+                icon.textContent = '☁️';
+            } else {
+                indicator.textContent = '💻 Browser Storage (Local Only)';
+                icon.textContent = '💻';
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('luxdesignEnabled').addEventListener('change', (e) => {
+                document.getElementById('luxdesignVersion').style.display = e.target.checked ? 'block' : 'none';
+            });
+
+            document.getElementById('finishingEnabled').addEventListener('change', (e) => {
+                document.getElementById('finishing-section').style.display = e.target.checked ? 'block' : 'none';
+            });
+        }
+
+        function addStep(section) {
+            const step = {
+                id: Date.now(),
+                name: '',
+                substeps: []
+            };
+            sopData[section].push(step);
+            renderSteps(section);
+        }
+
+        function removeStep(section, stepId) {
+            sopData[section] = sopData[section].filter(s => s.id !== stepId);
+            renderSteps(section);
+        }
+
+        function renderSteps(section) {
+            const container = document.getElementById(`${section}-steps`);
+            container.innerHTML = sopData[section].map(step => `
+                <div class="step-item">
+                    <div class="step-header">
+                        <input type="text" placeholder="Step Name" value="${step.name}" 
+                            onchange="updateStepName('${section}', ${step.id}, this.value)">
+                        <button class="btn-danger" onclick="removeStep('${section}', ${step.id})">Remove</button>
+                    </div>
+                    <div id="substeps-${step.id}"></div>
+                    <button class="add-substep-btn" onclick="addSubstep('${section}', ${step.id})">+ Add Sub-step</button>
+                </div>
+            `).join('');
+
+            sopData[section].forEach(step => {
+                renderSubsteps(section, step.id, step.substeps);
+            });
+        }
+
+        function updateStepName(section, stepId, name) {
+            const step = sopData[section].find(s => s.id === stepId);
+            if (step) step.name = name;
+        }
+
+        function addSubstep(section, stepId) {
+            const step = sopData[section].find(s => s.id === stepId);
+            if (step) {
+                step.substeps.push({
+                    id: Date.now(),
+                    description: '',
+                    tags: [],
+                    image: null
+                });
+                renderSubsteps(section, stepId, step.substeps);
+            }
+        }
+
+        function removeSubstep(section, stepId, substepId) {
+            const step = sopData[section].find(s => s.id === stepId);
+            if (step) {
+                step.substeps = step.substeps.filter(ss => ss.id !== substepId);
+                renderSubsteps(section, stepId, step.substeps);
+            }
+        }
+
+        function renderSubsteps(section, stepId, substeps) {
+            const container = document.getElementById(`substeps-${stepId}`);
+            if (!container) return;
+
+            container.innerHTML = substeps.map(substep => `
+                <div class="substep-item">
+                    <div class="substep-input-group">
+                        <label class="substep-label">Description</label>
+                        <textarea class="substep-input" rows="3" placeholder="Enter sub-step description"
+                            onchange="updateSubstepDescription('${section}', ${stepId}, ${substep.id}, this.value)">${substep.description}</textarea>
+                    </div>
+
+                    <div class="substep-input-group">
+                        <label class="substep-label">Tags</label>
+                        <div class="tag-input">
+                            ${(substep.tags || []).map(tag => `
+                                <div class="tag">
+                                    ${tag}
+                                    <button type="button" onclick="removeTag('${section}', ${stepId}, ${substep.id}, '${tag}')">×</button>
+                                </div>
+                            `).join('')}
+                            <input type="text" class="tag-add-input" placeholder="Add tag..." 
+                                onkeypress="if(event.key==='Enter') { addTag('${section}', ${stepId}, ${substep.id}, this.value); this.value=''; }">
+                        </div>
+                    </div>
+
+                    <div class="substep-input-group">
+                        <label class="substep-label">Image</label>
+                        <div class="image-upload-area" onclick="triggerImageUpload('${section}', ${stepId}, ${substep.id})">
+                            <div>📸 Click to upload image (PNG/JPG)</div>
+                            <input type="file" accept="image/*" onchange="handleImageUpload('${section}', ${stepId}, ${substep.id}, event)">
+                        </div>
+                        ${substep.image ? `<img src="${substep.image}" class="image-preview">` : ''}
+                    </div>
+
+                    <button class="btn-danger" onclick="removeSubstep('${section}', ${stepId}, ${substep.id})">Remove Sub-step</button>
+                </div>
+            `).join('');
+        }
+
+        function updateSubstepDescription(section, stepId, substepId, description) {
+            const step = sopData[section].find(s => s.id === stepId);
+            if (step) {
+                const substep = step.substeps.find(ss => ss.id === substepId);
+                if (substep) substep.description = description;
+            }
+        }
+
+        function addTag(section, stepId, substepId, tag) {
+            if (!tag.trim()) return;
+            const step = sopData[section].find(s => s.id === stepId);
+            if (step) {
+                const substep = step.substeps.find(ss => ss.id === substepId);
+                if (substep && !substep.tags.includes(tag.trim())) {
+                    substep.tags.push(tag.trim());
+                    renderSubsteps(section, stepId, step.substeps);
+                }
+            }
+        }
+
+        function removeTag(section, stepId, substepId, tag) {
+            const step = sopData[section].find(s => s.id === stepId);
+            if (step) {
+                const substep = step.substeps.find(ss => ss.id === substepId);
+                if (substep) {
+                    substep.tags = substep.tags.filter(t => t !== tag);
+                    renderSubsteps(section, stepId, step.substeps);
+                }
+            }
+        }
+
+        function triggerImageUpload(section, stepId, substepId) {
+            const container = event.target.closest('.image-upload-area');
+            const input = container.querySelector('input[type="file"]');
+            input.click();
+        }
+
+        function handleImageUpload(section, stepId, substepId, e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                cropperContext = { section, stepId, substepId };
+                const modal = document.getElementById('cropperModal');
+                const img = document.getElementById('cropImage');
+                img.src = event.target.result;
+                img.onload = () => {
+                    if (currentCropper) {
+                        currentCropper.destroy();
+                    }
+                    currentCropper = new Cropper(img, {
+                        aspectRatio: NaN,
+                        autoCropArea: 1,
+                        responsive: true,
+                        guides: true,
+                        highlight: true,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true
+                    });
+                    modal.classList.add('active');
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function confirmCrop() {
+            if (!currentCropper) return;
+            const canvas = currentCropper.getCroppedCanvas();
+            const croppedImage = canvas.toDataURL();
+            
+            const { section, stepId, substepId } = cropperContext;
+            const step = sopData[section].find(s => s.id === stepId);
+            if (step) {
+                const substep = step.substeps.find(ss => ss.id === substepId);
+                if (substep) {
+                    substep.image = croppedImage;
+                    renderSubsteps(section, stepId, step.substeps);
+                }
+            }
+            closeCropper();
+        }
+
+        function closeCropper() {
+            document.getElementById('cropperModal').classList.remove('active');
+            if (currentCropper) {
+                currentCropper.destroy();
+                currentCropper = null;
+            }
+            cropperContext = {};
+        }
+
+        async function saveSOP() {
+            const sopName = prompt('Enter SOP Name:');
+            if (!sopName) return;
+
+            const sop = {
+                id: Date.now(),
+                name: sopName,
+                material: document.getElementById('material').value,
+                application: document.getElementById('application').value,
+                equipment: document.getElementById('equipment').value,
+                resinTank: document.getElementById('resinTank').value,
+                luxdesignEnabled: document.getElementById('luxdesignEnabled').checked,
+                luxdesignVersion: document.getElementById('luxdesignVersionValue').value,
+                luxflowVersion: document.getElementById('luxflowVersion').value,
+                printerFirmware: document.getElementById('printerFirmware').value,
+                washBoxFirmware: document.getElementById('washBoxFirmware').value,
+                cureBoxFirmware: document.getElementById('cureBoxFirmware').value,
+                luxflow: JSON.parse(JSON.stringify(sopData.luxflow)),
+                postprocess: JSON.parse(JSON.stringify(sopData.postprocess)),
+                finishing: document.getElementById('finishingEnabled').checked ? JSON.parse(JSON.stringify(sopData.finishing)) : [],
+                createdAt: new Date().toLocaleString()
+            };
+
+            allSOPs[sop.id] = sop;
+            await persistSOPs();
+            alert('✅ SOP saved successfully!');
+            resetForm();
+            renderSOPList();
+            showPage('viewer');
+        }
+
+        function resetForm() {
+            sopData.luxflow = [];
+            sopData.postprocess = [];
+            sopData.finishing = [];
+            document.getElementById('application').value = '';
+            document.getElementById('luxdesignEnabled').checked = false;
+            document.getElementById('luxdesignVersionValue').value = '';
+            document.getElementById('luxflowVersion').value = '';
+            document.getElementById('printerFirmware').value = '';
+            document.getElementById('washBoxFirmware').value = '';
+            document.getElementById('cureBoxFirmware').value = '';
+            document.getElementById('finishingEnabled').checked = false;
+            document.getElementById('finishing-section').style.display = 'none';
+            renderSteps('luxflow');
+            renderSteps('postprocess');
+            renderSteps('finishing');
+        }
+
+        async function persistSOPs() {
+            try {
+                if (window.storage) {
+                    await window.storage.set('luxcreo-sops', JSON.stringify(allSOPs));
+                    storageType = 'window.storage';
+                    updateStorageIndicator();
+                    return;
+                }
+            } catch (error) {
+                // Fall back to localStorage
+            }
+            localStorage.setItem('luxcreo-sops', JSON.stringify(allSOPs));
+            storageType = 'localStorage';
+            updateStorageIndicator();
+        }
+
+        async function loadSOPs() {
+            try {
+                if (window.storage) {
+                    const result = await window.storage.get('luxcreo-sops');
+                    if (result) {
+                        allSOPs = JSON.parse(result.value);
+                        storageType = 'window.storage';
+                        return;
+                    }
+                }
+            } catch (error) {
+                // Fall back to localStorage
+            }
+            const stored = localStorage.getItem('luxcreo-sops');
+            allSOPs = stored ? JSON.parse(stored) : {};
+            storageType = 'localStorage';
+        }
+
+        function renderSOPList() {
+            const listView = document.getElementById('sop-list-view');
+            const sopIds = Object.keys(allSOPs);
+
+            if (sopIds.length === 0) {
+                listView.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <h2>No SOPs Yet</h2>
+                        <p>Create your first SOP to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listView.innerHTML = `
+                <div class="sop-list">
+                    ${sopIds.map(id => {
+                        const sop = allSOPs[id];
+                        return `
+                            <div class="sop-card">
+                                <div class="sop-card-title">${sop.name}</div>
+                                <div class="sop-card-meta">
+                                    <div>📦 ${sop.material}</div>
+                                    <div>🔧 ${sop.equipment}</div>
+                                    <div style="font-size: 0.8em; color: #999; margin-top: 8px;">${sop.createdAt}</div>
+                                </div>
+                                <div class="sop-card-buttons">
+                                    <button class="btn-small btn-view" onclick="viewSOP(${id})">View</button>
+                                    <button class="btn-small btn-delete" onclick="deleteSOP(${id})">Delete</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function viewSOP(sopId) {
+            currentSOPView = sopId;
+            renderSOPDetail();
+        }
+
+        function renderSOPDetail() {
+            const sop = allSOPs[currentSOPView];
+            if (!sop) return;
+
+            const detailView = document.getElementById('sop-detail-view');
+            const listView = document.getElementById('sop-list-view');
+
+            listView.style.display = 'none';
+            detailView.style.display = 'block';
+
+            const renderSection = (title, steps) => {
+                if (steps.length === 0) return '';
+                return `
+                    <div class="sop-section">
+                        <div class="sop-section-title">${title}</div>
+                        ${steps.map(step => `
+                            <div class="sop-step">
+                                <div class="sop-step-title">${step.name}</div>
+                                ${step.substeps.map(substep => `
+                                    <div class="sop-substep">
+                                        <div class="sop-substep-description">${substep.description}</div>
+                                        ${substep.tags && substep.tags.length > 0 ? `
+                                            <div class="sop-tags">
+                                                ${substep.tags.map(tag => `<span class="sop-tag">${tag}</span>`).join('')}
+                                            </div>
+                                        ` : ''}
+                                        ${substep.image ? `<img src="${substep.image}" class="sop-image">` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            };
+
+            detailView.innerHTML = `
+                <button class="back-btn" onclick="backToList()">← Back to List</button>
+                <div class="sop-viewer">
+                    <div class="sop-header">
+                        <div class="sop-title">${sop.name}</div>
+                        <div class="sop-meta">
+                            <div class="sop-meta-item">
+                                <div class="sop-meta-label">Material</div>
+                                <div class="sop-meta-value">${sop.material}</div>
+                            </div>
+                            <div class="sop-meta-item">
+                                <div class="sop-meta-label">Application</div>
+                                <div class="sop-meta-value">${sop.application}</div>
+                            </div>
+                            <div class="sop-meta-item">
+                                <div class="sop-meta-label">Equipment</div>
+                                <div class="sop-meta-value">${sop.equipment}</div>
+                            </div>
+                            <div class="sop-meta-item">
+                                <div class="sop-meta-label">Resin Tank</div>
+                                <div class="sop-meta-value">${sop.resinTank}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${renderSection('LuxFlow: One-Click Generation', sop.luxflow)}
+                    ${renderSection('Post-Processing', sop.postprocess)}
+                    ${sop.finishing && sop.finishing.length > 0 ? renderSection('Finishing', sop.finishing) : ''}
+                </div>
+            `;
+        }
+
+        function backToList() {
+            document.getElementById('sop-list-view').style.display = 'block';
+            document.getElementById('sop-detail-view').style.display = 'none';
+            currentSOPView = null;
+        }
+
+        async function deleteSOP(sopId) {
+            if (!confirm('Delete this SOP?')) return;
+            delete allSOPs[sopId];
+            await persistSOPs();
+            renderSOPList();
+        }
+
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageName).classList.add('active');
+            if (pageName === 'viewer') {
+                renderSOPList();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

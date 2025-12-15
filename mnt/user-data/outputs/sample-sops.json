@@ -1,0 +1,237 @@
+[
+  {
+    "id": "sop-dmr3-001",
+    "name": "4D Aligner Manufacturing - DMR III Standard Process",
+    "material": "DMR III",
+    "application": "Orthodontic Aligners",
+    "equipment": "iLuxPro Dental",
+    "resinTank": "LEAP C+",
+    "createdAt": "2025-12-15",
+    "createdBy": "manufacturing-team@company.com",
+    "status": "approved",
+    "version": "1.0.0",
+    "firmwareVersions": {
+      "luxflow": "3.2.1",
+      "printer": "4.1.0",
+      "washBox": "2.3.0",
+      "cureBox": "1.8.0"
+    },
+    "notes": "Standard workflow for producing high-precision aligner trays. Material is UV-sensitive - follow light exposure guidelines carefully.",
+    "luxflowSteps": [
+      {
+        "id": "luxflow-1",
+        "name": "Printer Setup & Calibration",
+        "substeps": [
+          {
+            "id": "sub-1",
+            "description": "Power on iLuxPro Dental printer and wait for 5-minute warm-up cycle. Verify all indicator lights are green on the main panel.",
+            "tags": ["Critical"],
+            "image": null
+          },
+          {
+            "id": "sub-2",
+            "description": "Insert LEAP C+ resin tank into printer cartridge slot. Align blue label with the white indicator mark. Push firmly until you hear the click.",
+            "tags": ["Critical", "Safety"],
+            "image": null
+          },
+          {
+            "id": "sub-3",
+            "description": "Open LuxFlow software on connected workstation. Select 'DMR III' material profile from dropdown menu.",
+            "tags": [],
+            "image": null
+          },
+          {
+            "id": "sub-4",
+            "description": "Verify print bed is clean and dry. Wipe with lint-free cloth if necessary. Install print build platform by sliding into alignment rails until secure.",
+            "tags": ["Critical"],
+            "image": null
+          },
+          {
+            "id": "sub-5",
+            "description": "Load digital design file (STL format). Select 'Aligner Tray Standard' preset to auto-configure print parameters: XY resolution 25 microns, Z-layer 50 microns.",
+            "tags": ["Tip"],
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "luxflow-2",
+        "name": "Print Execution",
+        "substeps": [
+          {
+            "id": "sub-6",
+            "description": "Review print preview on screen. Verify trays are positioned with adequate spacing (minimum 15mm between parts). Check estimated print time (typically 45-75 minutes for batch of 11 trays).",
+            "tags": [],
+            "image": null
+          },
+          {
+            "id": "sub-7",
+            "description": "Click 'Start Print' button. System will perform automatic resin leveling and exposure calibration (approximately 90 seconds). Do not open printer during this phase.",
+            "tags": ["Warning", "Critical"],
+            "image": null
+          },
+          {
+            "id": "sub-8",
+            "description": "Monitor print progress via console. Watch for any error warnings. System will automatically notify when print is complete.",
+            "tags": [],
+            "image": null
+          },
+          {
+            "id": "sub-9",
+            "description": "Once complete, remove build platform and place on designated cooling tray. Allow 10 minutes for parts to set before handling.",
+            "tags": ["Timing"],
+            "image": null
+          },
+          {
+            "id": "sub-10",
+            "description": "Use plastic scraper tool to carefully remove trays from build platform. Start from one corner and work edges first. Angle platform at 45 degrees for easier removal.",
+            "tags": ["Tip"],
+            "image": null
+          }
+        ]
+      }
+    ],
+    "postprocessingSteps": [
+      {
+        "id": "post-1",
+        "name": "Wash Station Processing",
+        "substeps": [
+          {
+            "id": "sub-11",
+            "description": "Transfer printed trays to iLuxWash Dental wash station basket. Load maximum 12 trays per basket (do not overload).",
+            "tags": ["Critical"],
+            "image": null
+          },
+          {
+            "id": "sub-12",
+            "description": "Fill wash station with DMR III cleaning solution (specific solvent matched to material). Liquid level should reach marked line on tank side.",
+            "tags": ["Safety"],
+            "image": null
+          },
+          {
+            "id": "sub-13",
+            "description": "Insert basket into wash chamber. Select 'DMR III - Aligner' wash program on touchscreen. Typical cycle: 8 minutes standard wash, 3 minutes rinse.",
+            "tags": ["Timing"],
+            "image": null
+          },
+          {
+            "id": "sub-14",
+            "description": "At cycle completion, remove basket carefully. Inspect trays for any remaining resin residue. Rinse under distilled water if needed.",
+            "tags": [],
+            "image": null
+          },
+          {
+            "id": "sub-15",
+            "description": "Transfer trays to air-dry rack. Position on clean surface in dark area. Allow 15-20 minutes air dry time before UV curing.",
+            "tags": ["Timing", "Critical"],
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "post-2",
+        "name": "Oven Cure Process",
+        "substeps": [
+          {
+            "id": "sub-16",
+            "description": "Preheat LuxOven Pro to 85°C. Allow 5-minute warm-up. Verify temperature on digital display before proceeding.",
+            "tags": ["Critical", "Timing"],
+            "image": null
+          },
+          {
+            "id": "sub-17",
+            "description": "Load dried trays into oven-safe ceramic tray (maximum 12 trays). Space evenly to allow heat circulation. Do not stack.",
+            "tags": ["Critical"],
+            "image": null
+          },
+          {
+            "id": "sub-18",
+            "description": "Insert tray into oven center. Close door and select 'DMR III - Thermal Cure' program. Cure time: 10 minutes at 85°C.",
+            "tags": ["Timing", "Critical"],
+            "image": null
+          },
+          {
+            "id": "sub-19",
+            "description": "At completion, carefully remove tray using thermal gloves. Place on cooling rack. Allow 20 minutes room temperature cooling before handling.",
+            "tags": ["Safety", "Timing"],
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "post-3",
+        "name": "UV Curing",
+        "substeps": [
+          {
+            "id": "sub-20",
+            "description": "Transfer cooled trays to iLuxCure Pro UV chamber. Load maximum 12 trays per cycle in single layer.",
+            "tags": ["Critical"],
+            "image": null
+          },
+          {
+            "id": "sub-21",
+            "description": "Close chamber door. Select 'DMR III - Final UV Cure' from preset menu. Standard program: 20 minutes full spectrum UV exposure.",
+            "tags": ["Timing"],
+            "image": null
+          },
+          {
+            "id": "sub-22",
+            "description": "Once cycle completes, remove trays from chamber. Parts are now fully polymerized and ready for finishing operations.",
+            "tags": [],
+            "image": null
+          }
+        ]
+      }
+    ],
+    "finishingSteps": [
+      {
+        "id": "finish-1",
+        "name": "Quality Control Inspection",
+        "substeps": [
+          {
+            "id": "sub-23",
+            "description": "Inspect each tray under bright LED light (minimum 500 lux). Check for surface defects, cracks, or discoloration. Compare against reference sample.",
+            "tags": ["Critical"],
+            "image": null
+          },
+          {
+            "id": "sub-24",
+            "description": "Measure tray dimensions using digital calipers at 3 points: width at widest point, height from base, and depth. All measurements must be within ±0.2mm of design specifications.",
+            "tags": ["Critical"],
+            "image": null
+          },
+          {
+            "id": "sub-25",
+            "description": "Mark any defective trays with red marker on underside. Set aside for rework queue. Segregate from approved batch to prevent mix-up.",
+            "tags": ["Warning"],
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "finish-2",
+        "name": "Packaging & Labeling",
+        "substeps": [
+          {
+            "id": "sub-26",
+            "description": "Place approved trays into branded packaging box. Include silica desiccant packet. Seal box with company tape.",
+            "tags": [],
+            "image": null
+          },
+          {
+            "id": "sub-27",
+            "description": "Apply label with: batch number, material type (DMR III), production date, quality inspector initials, and expiration date (2 years from production).",
+            "tags": ["Critical"],
+            "image": null
+          },
+          {
+            "id": "sub-28",
+            "description": "Store in cool, dark location (15-25°C, <60% humidity). Avoid direct sunlight exposure which can degrade UV-sensitive resin.",
+            "tags": ["Warning"],
+            "image": null
+          }
+        ]
+      }
+    ]
+  }
+]
