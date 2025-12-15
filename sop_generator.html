@@ -771,8 +771,8 @@
             display: inline-block;
             color: white;
             padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.85em;
+            border-radius: 4px;
+            font-size: 0.95em;
             font-weight: 600;
             margin: 0 2px;
             white-space: nowrap;
@@ -781,21 +781,23 @@
         .sop-image {
             max-width: 240px;
             max-height: 240px;
-            margin: 12px 12px 12px 0;
             border-radius: 6px;
             border: 1px solid var(--gray);
             object-fit: contain;
-            flex-shrink: 0;
+            grid-column: 1;
+            grid-row: 1;
         }
 
         .sop-substep-with-image {
-            display: flex;
+            display: grid;
+            grid-template-columns: 240px 1fr;
             gap: 15px;
             align-items: flex-start;
         }
 
         .sop-substep-content {
-            flex: 1;
+            grid-column: 2;
+            grid-row: 1;
         }
 
         .back-btn {
@@ -994,8 +996,8 @@
         <!-- Viewer Page -->
         <div id="viewer" class="page">
             <div style="margin-bottom: 20px; display: flex; gap: 10px; justify-content: flex-end;">
-                <button class="btn-nav" onclick="exportSOPs()" style="padding: 12px 24px; font-size: 1em;">📥 Export SOPs</button>
-                <button class="btn-nav" onclick="triggerImport()" style="padding: 12px 24px; font-size: 1em;">📤 Import SOPs</button>
+                <button class="btn-nav" onclick="exportSOPs()" style="padding: 12px 24px; font-size: 1em; background: var(--orange); border-color: var(--orange); color: white;">📥 Export SOPs</button>
+                <button class="btn-nav" onclick="triggerImport()" style="padding: 12px 24px; font-size: 1em; background: var(--orange); border-color: var(--orange); color: white;">📤 Import SOPs</button>
                 <input type="file" id="import-file" accept=".json" onchange="importSOPs(event)" style="display: none;">
             </div>
             <div id="sop-list-view"></div>
@@ -1055,10 +1057,10 @@
         function parseAndRenderDescription(description) {
             if (!description) return '';
             
-            // Find all [TagName] patterns and replace with colored spans
-            return description.replace(/\[([^\]]+)\]/g, (match, tagName) => {
+            // Find all [TAGNAME "text"] patterns and replace with highlighted spans
+            return description.replace(/\[(\w+)\s+"([^"]+)"\]/g, (match, tagName, displayText) => {
                 const color = tagColors[tagName] || '#6366f1';
-                return `<span class="inline-tag" style="background-color: ${color};">${tagName}</span>`;
+                return `<span class="inline-tag" style="background-color: ${color};">${displayText}</span>`;
             });
         }
 
@@ -1172,7 +1174,7 @@
                     <div class="substep-input-group">
                         <label class="substep-label">Description</label>
                         <small style="color: var(--text); font-style: italic; display: block; margin-bottom: 8px;">
-                            💡 Use [TagName] in text for colored tags. Example: "Heat to 200°C [Critical]"
+                            💡 Use [TAGNAME "text"] syntax to highlight text with color. Example: 'Heat to 200°C [CRITICAL "critical step"] for 5 minutes'
                         </small>
                         <textarea class="substep-input" rows="3" placeholder="Enter sub-step description. Use [TagName] for tags."
                             onchange="updateSubstepDescription('${section}', ${stepId}, ${substep.id}, this.value)">${substep.description}</textarea>
